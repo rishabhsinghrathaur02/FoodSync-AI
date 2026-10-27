@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FoodSync AI | Food recovery command centre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-icon">F</span><div><strong>FoodSync</strong><small>AI COMMAND CENTRE</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <a class="nav active" href="#overview">◫ <span>Overview</span></a>
+    <a class="nav" href="#surplus">♧ <span>Food surplus</span></a>
+    <a class="nav" href="#network">◎ <span>NGO network</span></a>
+    <a class="nav" href="#deliveries">↗ <span>Deliveries</span></a>
+    <a class="nav" href="#agents">✳ <span>Agent activity</span></a>
+    <div class="sidebar-bottom"><div class="live-dot"></div><span>Prototype environment</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">FOOD RECOVERY NETWORK / INDIA</div><h1>Operations overview</h1><p class="subhead">Turn surplus into timely, verified food recovery.</p></div>
+      <form method="post" action="{{ url_for('seed') }}"><button class="btn btn-secondary" type="submit">↻ Load demo data</button></form>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-wrap">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% endwith %}
+
+    <section id="overview" class="metric-grid">
+      <article class="metric-card"><div class="metric-top"><span>Registered donors</span><span class="metric-icon">♧</span></div><div class="metric-value">{{ metrics.donors }}</div><div class="metric-note">Restaurants, hotels & events</div></article>
+      <article class="metric-card"><div class="metric-top"><span>Partner NGOs</span><span class="metric-icon">◎</span></div><div class="metric-value">{{ metrics.ngos }}</div><div class="metric-note">Recipient network</div></article>
+      <article class="metric-card accent-card"><div class="metric-top"><span>Eligible portions</span><span class="metric-icon">✳</span></div><div class="metric-value">{{ metrics.eligible_portions }}</div><div class="metric-note">Safety-cleared listings only</div></article>
+      <article class="metric-card"><div class="metric-top"><span>Received by NGOs</span><span class="metric-icon">✓</span></div><div class="metric-value">{{ metrics.received_portions }}</div><div class="metric-note">Receipt status recorded</div></article>
+    </section>
+
+    <section class="hero-panel">
+      <div class="hero-copy"><span class="pill"><span class="pulse"></span> COORDINATION ENGINE</span><h2>Synchronizing surplus.<br><em>Nourishing lives.</em></h2><p>Five focused agents coordinate food listings, NGO demand, feasible allocations, NGO-provided delivery partners and verified impact.</p>
+        <div class="hero-actions">
+          <form method="post" action="{{ url_for('allocate') }}"><button class="btn btn-primary" type="submit">▶ Run allocation</button></form>
+          <form method="post" action="{{ url_for('disruption') }}"><button class="btn btn-light" type="submit">⚡ Simulate disruption</button></form>
+        </div>
+      </div>
+      <div class="hero-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit-core">FS<span>AI</span></div><div class="orbit-node node-one">01</div><div class="orbit-node node-two">02</div><div class="orbit-node node-three">03</div><div class="orbit-node node-four">04</div><div class="orbit-node node-five">05</div></div>
+    </section>
+
+    <section class="section-heading" id="surplus"><div><div class="eyebrow">SUPPLY SIDE</div><h2>Surplus food intake</h2></div><span class="section-count">{{ listings|length }} listings</span></section>
+    <section class="two-col">
+      <article class="panel">
+        <div class="panel-heading"><div><h3>Register a donor</h3><p>Add a restaurant, hotel or event provider.</p></div><span class="panel-symbol">＋</span></div>
+        <form class="form-grid" method="post" action="{{ url_for('add_donor') }}">
+          <label>Business name<input name="name" required placeholder="e.g. Green Bowl Cafe"></label>
+          <label>Pickup location<input name="location" required placeholder="Area / landmark"></label>
+          <label class="full">Contact (optional)<input name="contact" placeholder="Email or phone"></label>
+          <div class="full"><button class="btn btn-primary" type="submit">Register donor</button></div>
+        </form>
+      </article>
+      <article class="panel">
+        <div class="panel-heading"><div><h3>Report surplus</h3><p>Safety status is a hard allocation gate.</p></div><span class="panel-symbol">♧</span></div>
+        <form class="form-grid" method="post" action="{{ url_for('add_surplus') }}">
+          <label class="full">Donor<select name="donor_id" required>{% for d in donors %}<option value="{{ d.id }}">{{ d.name }} — {{ d.location }}</option>{% endfor %}</select></label>
+          <label>Food type<select name="food_type"><option>Vegetarian</option><option>Non-Vegetarian</option></select></label>
+          <label>Portions<input type="number" name="quantity" min="1" required placeholder="50"></label>
+          <label>Ready for pickup<input type="datetime-local" name="ready_time" required></label>
+          <label>Use-by / delivery deadline<input type="datetime-local" name="deadline" required></label>
+          <label>Eligibility status<select name="safety_status"><option>Pending</option><option>Eligible</option><option>Blocked</option></select></label>
+          <label>Notes (optional)<input name="notes" placeholder="Storage / allergen notes"></label>
+          <div class="full"><button class="btn btn-primary" type="submit">Submit surplus listing</button></div>
+        </form>
+        <p class="microcopy">“Eligible” is a demo workflow state, not an AI food-safety certification. Use only after authorised checks.</p>
+      </article>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><h3>Live surplus inventory</h3><p>Pending or blocked listings cannot be allocated.</p></div><span class="status-chip">{{ metrics.pending_safety }} need review</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Donor</th><th>Food</th><th>Portions</th><th>Ready</th><th>Deadline</th><th>Safety gate</th></tr></thead><tbody>
+      {% for l in listings %}<tr><td><strong>{{ l.donor_name }}</strong><small>{{ l.donor_location }}</small></td><td>{{ l.food_type }}</td><td>{{ l.quantity }}</td><td>{{ l.ready_time|pretty_time }}</td><td>{{ l.deadline|pretty_time }}</td><td><span class="badge {{ 'good' if l.status == 'Eligible' and l.safety_status == 'Eligible' else ('bad' if l.status == 'Blocked' else 'pending') }}">{{ l.status }}</span></td></tr>
+      {% else %}<tr><td colspan="6" class="empty">No surplus yet. Load demo data or register a listing.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+
+    <section class="section-heading" id="network"><div><div class="eyebrow">RECIPIENT + DELIVERY CAPACITY</div><h2>NGO network</h2></div><span class="section-count">{{ ngos|length }} NGOs · {{ partners|length }} partners</span></section>
+    <section class="two-col">
+      <article class="panel">
+        <div class="panel-heading"><div><h3>Register an NGO</h3><p>Capture current demand and capacity.</p></div><span class="panel-symbol">◎</span></div>
+        <form class="form-grid" method="post" action="{{ url_for('add_ngo') }}">
+          <label>NGO name<input name="name" required placeholder="Organisation name"></label>
+          <label>Location<input name="location" required placeholder="Area / landmark"></label>
+          <label>Meal demand (portions)<input type="number" name="demand" min="0" value="0" required></label>
+          <label>Receiving capacity<input type="number" name="capacity" min="0" value="0" required></label>
+          <label class="full">Accepted food<select name="accepted_food"><option>Both</option><option>Vegetarian</option><option>Non-Vegetarian</option></select></label>
+          <div class="full"><button class="btn btn-primary" type="submit">Register NGO</button></div>
+        </form>
+      </article>
+      <article class="panel">
+        <div class="panel-heading"><div><h3>Register NGO delivery partner</h3><p>Delivery partners come from NGOs—not a FoodSync-owned fleet.</p></div><span class="panel-symbol">↗</span></div>
+        <form class="form-grid" method="post" action="{{ url_for('add_partner') }}">
+          <label class="full">Partner's NGO<select name="ngo_id" required>{% for n in ngos %}<option value="{{ n.id }}">{{ n.name }}</option>{% endfor %}</select></label>
+          <label>Partner / team name<input name="name" required placeholder="Partner name"></label>
+          <label>Transport<select name="transport"><option>Motorcycle</option><option>Car</option><option>Van</option><option>Walking</option></select></label>
+          <label>Portion capacity<input type="number" name="capacity" min="1" value="30" required></label>
+          <label class="check-label"><input type="checkbox" name="available" checked> Available now</label>
+          <div class="full"><button class="btn btn-primary" type="submit">Add delivery partner</button></div>
+        </form>
+      </article>
+    </section>
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><h3>Delivery capacity</h3><p>Availability changes as assignments are made.</p></div></div>
+      <div class="table-scroll"><table><thead><tr><th>Partner</th><th>NGO</th><th>Transport</th><th>Capacity</th><th>Availability</th></tr></thead><tbody>
+      {% for p in partners %}<tr><td><strong>{{ p.name }}</strong></td><td>{{ p.ngo_name }}</td><td>{{ p.transport }}</td><td>{{ p.capacity }} portions</td><td><span class="badge {{ 'good' if p.available else 'pending' }}">{{ 'Available' if p.available else 'Assigned / unavailable' }}</span></td></tr>
+      {% else %}<tr><td colspan="5" class="empty">No delivery partners registered.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+
+    <section class="section-heading" id="deliveries"><div><div class="eyebrow">EXECUTION</div><h2>Pickup & delivery tracking</h2></div><span class="section-count">{{ deliveries|length }} assignments</span></section>
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><h3>Delivery assignments</h3><p>Update status as the NGO partner progresses.</p></div><span class="status-chip">{{ metrics.on_time_rate }}% on-time (recorded)</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Delivery</th><th>Donor → NGO</th><th>Partner</th><th>Quantity</th><th>ETA</th><th>Status</th><th>Update</th></tr></thead><tbody>
+      {% for x in deliveries %}<tr><td><strong>#{{ x.id }}</strong><small>{{ x.created_at|pretty_time }}</small></td><td>{{ x.donor_name }}<small>→ {{ x.ngo_name }}</small></td><td>{{ x.partner_name or 'Unassigned' }}{% if x.disruption_note %}<small>{{ x.disruption_note }}</small>{% endif %}</td><td>{{ x.quantity }}</td><td>{{ x.estimated_minutes }} min</td><td><span class="badge {{ 'good' if x.status in ['Received by NGO','Distribution Confirmed'] else 'pending' }}">{{ x.status }}</span></td><td><form class="inline-form" method="post" action="{{ url_for('update_delivery', delivery_id=x.id) }}"><select name="status">{% for s in ['Assigned','Picked Up','In Transit','Received by NGO','Distribution Confirmed','Cancelled'] %}<option {% if x.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select><button class="btn btn-small" type="submit">Save</button></form></td></tr>
+      {% else %}<tr><td colspan="7" class="empty">No deliveries yet. Run allocation after loading demo data.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+
+    <section class="impact-grid">
+      <article class="impact-card"><div class="eyebrow">RECEIPT VERIFIED</div><div class="impact-number">{{ metrics.received_portions }}</div><p>Portions marked received by an NGO</p></article>
+      <article class="impact-card"><div class="eyebrow">DISTRIBUTION CONFIRMED</div><div class="impact-number">{{ metrics.distributed_portions }}</div><p>Portions with distribution confirmation recorded</p></article>
+      <article class="impact-card"><div class="eyebrow">UNMET NGO DEMAND</div><div class="impact-number">{{ metrics.unmet_demand }}</div><p>Current remaining demand entered by NGOs</p></article>
+      <article class="impact-card"><div class="eyebrow">SAFETY REVIEW</div><div class="impact-number">{{ metrics.pending_safety }}</div><p>Listings pending or blocked from allocation</p></article>
+    </section>
+
+    <section class="section-heading" id="agents"><div><div class="eyebrow">OBSERVABILITY</div><h2>Agent activity log</h2></div><span class="section-count">Latest 12 events</span></section>
+    <section class="panel event-panel">
+      {% for e in events %}<div class="event-row"><div class="event-mark">✳</div><div class="event-text"><strong>{{ e.agent }}</strong><p>{{ e.message }}</p></div><time>{{ e.created_at|pretty_time }}</time></div>
+      {% else %}<p class="empty">Agent events will appear here as you use the system.</p>{% endfor %}
+    </section>
+    <footer>FoodSync AI <span>·</span> Hackathon prototype <span>·</span> Demo records are simulated</footer>
+  </main>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
